@@ -55,7 +55,6 @@ chiphell-monitor/
 ├── icons/               图标 16/48/128
 ├── donate/              赞赏码（微信 / 支付宝）
 ├── PRIVACY.md           隐私政策
-├── STORE_LISTING.md     商店上架文案
 ├── LICENSE              MIT 许可证
 └── README.md
 ```
@@ -135,7 +134,6 @@ chiphell-monitor/
 ├── icons/               Icons 16/48/128
 ├── donate/              Donation QR codes (WeChat / Alipay)
 ├── PRIVACY.md           Privacy policy
-├── STORE_LISTING.md     Store listing copy
 ├── LICENSE              MIT License
 └── README.md
 ```
