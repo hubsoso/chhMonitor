@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:800px; overflow:hidden;
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  body {
+    background:
+      radial-gradient(900px 500px at 22% 18%, rgba(200,16,46,0.32), transparent 60%),
+      linear-gradient(135deg,#15100f 0%,#241a1c 50%,#1a1113 100%);
+    color:#fff; display:flex; align-items:center; gap:50px; padding:0 70px;
+  }
+  .left { width:560px; order:2; }
+  .badge-pill { display:inline-block; font-size:14px; letter-spacing:1px;
+    background:rgba(200,16,46,0.2); color:#ff8a99; border:1px solid rgba(200,16,46,0.5);
+    padding:5px 12px; border-radius:20px; margin-bottom:22px; }
+  h1 { font-size:50px; line-height:1.2; font-weight:800; margin-bottom:26px; }
+  h1 .hl { color:#ff5b70; }
+  ul { list-style:none; }
+  li { font-size:21px; line-height:1.5; margin:16px 0; display:flex; align-items:flex-start; gap:12px; color:#e7dede; }
+  li .ic { color:#ff5b70; font-weight:800; font-size:22px; }
+  .foot { margin-top:34px; font-size:15px; color:#9a8f90; }
+
+  .right { flex:1; order:1; display:flex; justify-content:center; }
+  .panel { width:470px; background:#fff; color:#222; border-radius:16px; padding:26px 30px;
+    box-shadow:0 24px 70px rgba(0,0,0,0.55); }
+  .panel h2 { font-size:19px; margin-bottom:18px; }
+  .grp { margin:18px 0; }
+  .grp label { display:block; font-weight:700; font-size:14px; margin-bottom:7px; }
+  .sel { border:1px solid #ccc; border-radius:7px; padding:8px 12px; font-size:14px; color:#333;
+    display:inline-flex; align-items:center; justify-content:space-between; width:200px; }
+  .sel::after { content:"▾"; color:#999; margin-left:8px; }
+  .chk { display:flex; align-items:center; gap:9px; font-size:14px; color:#333; }
+  .box { width:18px; height:18px; border-radius:4px; border:2px solid #c8102e; background:#c8102e;
+    display:flex; align-items:center; justify-content:center; color:#fff; font-size:12px; font-weight:900; }
+  .box.off { background:#fff; border-color:#bbb; }
+  .ta { border:1px solid #ccc; border-radius:7px; padding:9px 11px; font-size:14px; color:#333;
+    margin-top:9px; background:#faf7f7; }
+  .hint { font-size:12px; color:#999; margin-top:6px; }
+  .save { margin-top:6px; display:inline-block; background:#c8102e; color:#fff; font-weight:700;
+    padding:9px 22px; border-radius:7px; font-size:14px; }
+</style></head>
+<body>
+  <div class="left">
+    <span class="badge-pill">精准过滤 · 少打扰</span>
+    <h1>只提醒你<br><span class="hl">真正想要</span>的</h1>
+    <ul>
+      <li><span class="ic">›</span><span>关键词过滤：只盯 4090、990 Pro、27寸…</span></li>
+      <li><span class="ic">›</span><span>发帖人过滤：只看常出好货的卖家</span></li>
+      <li><span class="ic">›</span><span>关键词 + 发帖人可按「或 / 且」组合</span></li>
+      <li><span class="ic">›</span><span>自定义刷新周期，随机抖动规避流控</span></li>
+    </ul>
+    <div class="foot">默认不弹窗，只用角标静默提示</div>
+  </div>
+
+  <div class="right">
+    <div class="panel">
+      <h2>设置</h2>
+      <div class="grp"><label>刷新周期</label><div class="sel">5 分钟（推荐）</div></div>
+      <div class="grp"><label>桌面弹窗通知</label>
+        <div class="chk"><span class="box off"></span>发现新帖时弹出系统通知（默认关闭）</div></div>
+      <div class="grp"><label>关键词过滤</label>
+        <div class="chk"><span class="box">✓</span>只对命中关键词的新帖提醒</div>
+        <div class="ta">4090, 5090, 显卡, 27寸, 990 Pro</div></div>
+      <div class="grp"><label>按发帖人过滤</label>
+        <div class="chk"><span class="box">✓</span>只对指定发帖人的新帖提醒</div>
+        <div class="ta">老黄的显卡, 存储小王</div></div>
+      <div class="grp"><label>组合方式</label><div class="sel">命中任一即提醒（或）</div></div>
+      <span class="save">保存</span>
+    </div>
+  </div>
+</body></html>

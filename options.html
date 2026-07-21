@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 14px/1.6 -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        max-width: 480px; margin: 32px auto; padding: 0 20px;
+        background: #fff; color: #222;
+      }
+      @media (prefers-color-scheme: dark) { body { background: #1e1e1e; color: #ddd; } }
+      h1 { font-size: 18px; }
+      .row { margin: 18px 0; }
+      label { font-weight: 600; display: block; margin-bottom: 6px; }
+      select {
+        font: inherit; padding: 6px 8px; border-radius: 6px;
+        border: 1px solid rgba(128,128,128,0.5); background: transparent; color: inherit;
+      }
+      .hint { font-size: 12px; opacity: 0.6; margin-top: 4px; }
+      .check { display: flex; align-items: center; gap: 8px; }
+      .check input { width: 16px; height: 16px; }
+      button {
+        font: inherit; font-weight: 600; padding: 8px 18px; border: none;
+        background: #c8102e; color: #fff; border-radius: 6px; cursor: pointer; margin-top: 10px;
+      }
+      button:hover { background: #a50d26; }
+      #saved { margin-left: 10px; color: #2ecc71; font-size: 13px; opacity: 0; transition: opacity 0.2s; }
+      #saved.show { opacity: 1; }
+    </style>
+  </head>
+  <body>
+    <h1>Chiphell 二手区监控 · 设置</h1>
+
+    <div class="row">
+      <label for="interval">刷新周期</label>
+      <select id="interval">
+        <option value="1">1 分钟</option>
+        <option value="2">2 分钟</option>
+        <option value="3">3 分钟</option>
+        <option value="5">5 分钟（推荐）</option>
+        <option value="10">10 分钟</option>
+        <option value="15">15 分钟</option>
+        <option value="30">30 分钟</option>
+      </select>
+      <div class="hint">每次刷新会附加 0~25% 的随机抖动，避免固定频率触发网站流控。周期越短越及时，但请求越频繁——建议 ≥ 5 分钟。</div>
+    </div>
+
+    <div class="row">
+      <label>桌面弹窗通知</label>
+      <div class="check">
+        <input type="checkbox" id="notify" />
+        <span>发现新帖时弹出系统通知（默认关闭，仅角标提示）</span>
+      </div>
+      <div class="hint">关闭时：只在扩展图标上显示新帖数量，不打断你的当前操作。</div>
+    </div>
+
+    <div class="row">
+      <label>关键词过滤</label>
+      <div class="check">
+        <input type="checkbox" id="keywordFilter" />
+        <span>只对标题命中关键词的新帖提醒（角标 / 弹窗）</span>
+      </div>
+      <textarea id="keywords" rows="2"
+        placeholder="用逗号或空格分隔，如：4090, 5090, CPU, 显卡, 27寸"
+        style="width:100%;box-sizing:border-box;margin-top:8px;padding:6px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.5);background:transparent;color:inherit;font:inherit;resize:vertical;"></textarea>
+      <div class="hint">大小写不敏感，标题包含任一关键词即命中。关闭此开关时，所有新帖都提醒（列表仍会显示全部帖子，仅命中项高亮）。</div>
+    </div>
+
+    <div class="row">
+      <label>按发帖人过滤</label>
+      <div class="check">
+        <input type="checkbox" id="authorFilter" />
+        <span>只对指定发帖人的新帖提醒</span>
+      </div>
+      <textarea id="authors" rows="2"
+        placeholder="每行一个或用逗号分隔，如：卖家A, 某某ID"
+        style="width:100%;box-sizing:border-box;margin-top:8px;padding:6px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.5);background:transparent;color:inherit;font:inherit;resize:vertical;"></textarea>
+      <div class="hint">按用户名精确匹配（大小写不敏感）。用逗号或换行分隔多个 ID；用户名含空格时请用逗号/换行分隔，不要用空格。</div>
+    </div>
+
+    <div class="row">
+      <label for="combine">关键词 + 发帖人 组合方式</label>
+      <select id="combine">
+        <option value="or">命中任一即提醒（关键词 或 发帖人）</option>
+        <option value="and">需同时命中（关键词 且 发帖人）</option>
+      </select>
+      <div class="hint">仅当"关键词过滤"和"按发帖人过滤"同时开启时生效。例：想要"某卖家发的 4090"选"且"；想要"任何 4090 帖 + 某卖家所有帖"选"或"。</div>
+    </div>
+
+    <button id="save">保存</button>
+    <span id="saved">已保存 ✓</span>
+
+    <hr style="margin:32px 0;border:none;border-top:1px solid rgba(128,128,128,0.25);" />
+
+    <div class="row">
+      <label>关于与支持</label>
+      <div class="hint" style="margin-bottom:12px;">
+        本扩展免费、开源、无广告、不收集任何数据。如果它帮你捡到了宝贝，欢迎请我喝杯咖啡 ☕
+      </div>
+      <a id="coffee" href="#"
+        style="display:inline-block;text-decoration:none;font-weight:600;color:#fff;background:#ff813f;padding:9px 18px;border-radius:8px;">
+        ☕ 请我喝咖啡
+      </a>
+    </div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

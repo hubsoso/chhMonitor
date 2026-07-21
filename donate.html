@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>请我喝咖啡</title>
+    <style>
+      :root { color-scheme: light dark; }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+        min-height: 100vh;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        padding: 40px 20px;
+        background: #faf7f7; color: #222;
+      }
+      @media (prefers-color-scheme: dark) { body { background: #1b1517; color: #eee; } }
+      h1 { font-size: 26px; margin-bottom: 10px; }
+      .sub { font-size: 15px; opacity: 0.7; margin-bottom: 32px; text-align: center; max-width: 560px; line-height: 1.6; }
+      .codes { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+      .card {
+        background: #fff; border-radius: 14px; padding: 14px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12); width: 300px;
+      }
+      @media (prefers-color-scheme: dark) { .card { background: #262022; box-shadow: 0 10px 30px rgba(0,0,0,0.5); } }
+      .card img { width: 100%; border-radius: 10px; display: block; }
+      .foot { margin-top: 34px; font-size: 12px; opacity: 0.5; text-align: center; max-width: 560px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <h1>请我喝咖啡 ☕</h1>
+    <div class="sub">
+      本扩展免费、无广告、不收集任何数据。<br />
+      希望能帮你捡到心仪的宝贝；
+      如果觉得有用，可以请我喝杯咖啡，感谢支持 🙏
+    </div>
+    <div class="codes">
+      <div class="card"><img src="donate/wechatpay.png" alt="微信支付" /></div>
+      <div class="card"><img src="donate/alipay.jpg" alt="支付宝" /></div>
+    </div>
+    <div class="foot">
+      本扩展为第三方非官方工具，与论坛无关联。打赏完全自愿，不解锁任何额外功能。
+    </div>
+  </body>
+</html>

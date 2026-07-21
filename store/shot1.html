@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"/>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html,body { width:1280px; height:800px; overflow:hidden;
+    font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif; }
+  body {
+    background:
+      radial-gradient(900px 500px at 78% 18%, rgba(200,16,46,0.35), transparent 60%),
+      linear-gradient(135deg,#1a1113 0%,#241a1c 45%,#15100f 100%);
+    color:#fff; display:flex; align-items:center; gap:40px; padding:0 70px;
+  }
+  .left { width:520px; }
+  .badge-pill { display:inline-block; font-size:14px; letter-spacing:1px;
+    background:rgba(200,16,46,0.2); color:#ff8a99; border:1px solid rgba(200,16,46,0.5);
+    padding:5px 12px; border-radius:20px; margin-bottom:22px; }
+  h1 { font-size:50px; line-height:1.2; font-weight:800; margin-bottom:26px; }
+  h1 .hl { color:#ff5b70; }
+  ul { list-style:none; }
+  li { font-size:21px; line-height:1.5; margin:16px 0; display:flex; align-items:flex-start; gap:12px; color:#e7dede; }
+  li .ic { color:#ff5b70; font-weight:800; font-size:22px; }
+  .foot { margin-top:34px; font-size:15px; color:#9a8f90; }
+
+  .right { flex:1; display:flex; flex-direction:column; align-items:center; }
+  .toolbar { width:520px; height:52px; background:#2c2224; border-radius:12px;
+    display:flex; align-items:center; padding:0 16px; gap:14px; margin-bottom:22px;
+    box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+  .toolbar .u { flex:1; height:26px; background:#3a2e30; border-radius:13px; }
+  .ext { position:relative; width:34px; height:34px; }
+  .ext img { width:34px; height:34px; border-radius:8px; }
+  .ext .b { position:absolute; right:-6px; top:-6px; background:#c8102e; color:#fff;
+    font-size:12px; font-weight:700; min-width:19px; height:19px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center; border:2px solid #2c2224; }
+
+  .popup { width:430px; background:#fff; color:#222; border-radius:14px; overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,0.55); font-size:14px; }
+  .p-head { display:flex; align-items:center; justify-content:space-between;
+    padding:13px 15px; border-bottom:1px solid #eee; }
+  .p-head .t { font-weight:700; font-size:16px; }
+  .p-head .s { display:flex; align-items:center; gap:7px; font-size:13px; color:#666; }
+  .dot { width:9px; height:9px; border-radius:50%; background:#2ecc71; }
+  .row { padding:11px 15px; border-bottom:1px solid #f2f2f2; }
+  .row.m { background:rgba(200,16,46,0.06); }
+  .row .tt { display:block; word-break:break-all; }
+  .row.n .tt { font-weight:700; }
+  .newdot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#c8102e; margin-right:7px; vertical-align:middle; }
+  .kw { display:inline-block; font-size:11px; color:#c8102e; border:1px solid #c8102e; border-radius:3px; padding:0 5px; margin-right:7px; vertical-align:middle; }
+  .by { font-size:12px; color:#999; margin-top:3px; }
+  .p-foot { display:flex; align-items:center; justify-content:space-between; padding:11px 15px; font-size:13px; }
+  .btn { border:1px solid #ccc; border-radius:6px; padding:5px 12px; color:#333; }
+  .meta { color:#999; font-size:12px; }
+  .link { color:#3b82f6; }
+</style></head>
+<body>
+  <div class="left">
+    <span class="badge-pill">CHH 二手区上新提醒 · 非官方</span>
+    <h1>二手区上新，<br><span class="hl">第一时间</span>知道</h1>
+    <ul>
+      <li><span class="ic">›</span><span>图标角标实时显示新帖数量，不打断你的操作</span></li>
+      <li><span class="ic">›</span><span>点击即看列表，标题 + 发帖人，一键直达原帖</span></li>
+      <li><span class="ic">›</span><span>关键词 / 发帖人命中自动高亮标记</span></li>
+    </ul>
+    <div class="foot">所有数据仅存本地 · 不上传任何服务器</div>
+  </div>
+
+  <div class="right">
+    <div class="toolbar">
+      <div class="u"></div>
+      <div class="ext"><img src="../icons/icon128.png"/><div class="b">3</div></div>
+    </div>
+    <div class="popup">
+      <div class="p-head"><span class="t">Chiphell 二手区</span>
+        <span class="s"><span class="dot"></span>已登录</span></div>
+      <div class="row n m"><span class="tt"><span class="newdot"></span><span class="kw">关键词</span>出 华硕天选 RTX 4090 24G 9成新 带票</span><div class="by">by 老黄的显卡</div></div>
+      <div class="row n"><span class="tt"><span class="newdot"></span>三星 990 Pro 2TB 全新未拆 便宜出</span><div class="by">by 存储小王</div></div>
+      <div class="row n m"><span class="tt"><span class="newdot"></span><span class="kw">关键词</span>出一套 27寸 4K 显示器 带原包</span><div class="by">by 显示器控</div></div>
+      <div class="row"><span class="tt">索尼 A7M4 机身 95新 带原包发票</span><div class="by">by 摄影达人</div></div>
+      <div class="row"><span class="tt">AMD 7950X3D 散片 成色新</span><div class="by">by DIY老炮</div></div>
+      <div class="p-foot"><span class="btn">立即刷新</span><span class="meta">3 新 · 更新于 16:42</span><span class="link">设置</span></div>
+    </div>
+  </div>
+</body></html>
