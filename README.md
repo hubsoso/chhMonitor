@@ -3,6 +3,8 @@
 一个 Chrome 扩展（Manifest V3），用于监控 Chiphell 论坛二手交易区的新帖并及时提醒。
 **非官方第三方工具，与 Chiphell 无关联。**
 
+> 📦 已上架 **[Chrome 应用商店](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea)** —— 点击一键安装。
+
 ## 功能
 
 - 📛 **角标计数**：图标上显示未读新帖数量
@@ -13,7 +15,13 @@
 - ⏱️ **自定义刷新周期**：1–30 分钟，附随机抖动规避频率风控
 - 🔐 **登录检测**：过期时角标变橙并在弹窗提示重新登录
 
-## 安装（开发者模式）
+## 安装
+
+**推荐**：直接从 [Chrome 应用商店](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea) 一键安装，自动更新。
+
+安装后确保同一个 Chrome 已登录 chiphell.com（扩展复用你的登录 Cookie）。
+
+### 开发者模式（本地开发 / 自行修改）
 
 1. 打开 `chrome://extensions/`
 2. 右上角开启 **开发者模式**
@@ -35,18 +43,6 @@
 ## 隐私
 
 不收集任何数据，所有设置与记录仅存于本机 `chrome.storage.local`，绝不上传服务器。详见 [PRIVACY.md](./PRIVACY.md)。
-
-## 发布到 Chrome Web Store
-
-上架文案见 [STORE_LISTING.md](./STORE_LISTING.md)。打包命令：
-
-```bash
-cd ~/chiphell-monitor
-zip -r -X ../chh-marketplace-alert.zip . \
-  -x '.*' -x '__MACOSX' -x '*.md' -x '*.zip'
-```
-
-> zip 根目录须直接是 `manifest.json`。更新版本时递增 `manifest.json` 的 `version`。
 
 ## 目录结构
 
@@ -87,6 +83,8 @@ chiphell-monitor/
 A Chrome extension (Manifest V3) that monitors the second-hand trading section of the Chiphell forum for new posts and alerts you promptly.
 **Unofficial third-party tool, not affiliated with Chiphell.**
 
+> 📦 Available on the **[Chrome Web Store](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea)** — install with one click.
+
 ## Features
 
 - 📛 **Badge count**: shows the number of unread new posts on the icon
@@ -97,7 +95,13 @@ A Chrome extension (Manifest V3) that monitors the second-hand trading section o
 - ⏱️ **Custom refresh interval**: 1–30 minutes, with random jitter to avoid rate-limit controls
 - 🔐 **Login detection**: when your session expires, the badge turns orange and the popup prompts you to log in again
 
-## Installation (Developer Mode)
+## Installation
+
+**Recommended**: install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea) for one-click install and automatic updates.
+
+After installing, make sure the same Chrome is logged in to chiphell.com (the extension reuses your login cookie).
+
+### Developer Mode (for local development / customization)
 
 1. Open `chrome://extensions/`
 2. Enable **Developer mode** in the top-right corner
@@ -119,18 +123,6 @@ A Chrome extension (Manifest V3) that monitors the second-hand trading section o
 ## Privacy
 
 Collects no data. All settings and records are stored only on your machine in `chrome.storage.local` and are never uploaded to any server. See [PRIVACY.md](./PRIVACY.md) for details.
-
-## Publishing to the Chrome Web Store
-
-See [STORE_LISTING.md](./STORE_LISTING.md) for the store listing copy. Packaging command:
-
-```bash
-cd ~/chiphell-monitor
-zip -r -X ../chh-marketplace-alert.zip . \
-  -x '.*' -x '__MACOSX' -x '*.md' -x '*.zip'
-```
-
-> The zip root must contain `manifest.json` directly. Increment the `version` in `manifest.json` when releasing an update.
 
 ## Directory Structure
 
