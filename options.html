@@ -62,9 +62,9 @@
         <span>只对标题命中关键词的新帖提醒（角标 / 弹窗）</span>
       </div>
       <textarea id="keywords" rows="2"
-        placeholder="用逗号或空格分隔，如：4090, 5090, CPU, 显卡, 27寸"
+        placeholder="每行一个或用逗号分隔，如：R5 5600, RTX 4090, 27寸"
         style="width:100%;box-sizing:border-box;margin-top:8px;padding:6px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.5);background:transparent;color:inherit;font:inherit;resize:vertical;"></textarea>
-      <div class="hint">大小写不敏感，标题包含任一关键词即命中。关闭此开关时，所有新帖都提醒（列表仍会显示全部帖子，仅命中项高亮）。</div>
+      <div class="hint">大小写不敏感；用逗号、分号、顿号或换行分隔多个关键词，空格属于关键词内容。例如“R5 5600”会整体匹配，不会误命中“DDR5”或“15600”。关闭此开关时，所有新帖都提醒。</div>
     </div>
 
     <div class="row">

@@ -23,13 +23,37 @@ async function getSettings() {
   );
 }
 
-// 关键词解析：支持中英文逗号 / 空格 / 顿号 / 分号分隔
+// 关键词解析：支持中英文逗号 / 顿号 / 分号 / 换行分隔。
+// 不按空格分隔，以便支持 "R5 5600" 这类短语关键词。
 function parseKeywords(raw) {
   if (!raw) return [];
   return raw
-    .split(/[\s,，、;；]+/)
+    .split(/[,，、;；\n]+/)
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
+}
+
+function escapeRegExp(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+// 短语中的空格可匹配空白或常见连接符；英文/数字两端使用边界，
+// 避免 "R5" 命中 "DDR5"、"5600" 命中 "15600"。
+function keywordPattern(keyword) {
+  const parts = keyword.trim().split(/\s+/).map(escapeRegExp);
+  const phrase = parts.join("[\\s\\-_/\\/·・‐‑‒–—]+");
+  const startsWithWord = /^[a-z0-9]/i.test(keyword);
+  const endsWithWord = /[a-z0-9]$/i.test(keyword);
+  return new RegExp(
+    (startsWithWord ? "(^|[^a-z0-9])" : "") +
+      phrase +
+      (endsWithWord ? "(?![a-z0-9])" : ""),
+    "i"
+  );
+}
+
+function matchKeywords(title, keywords) {
+  return keywords.some((keyword) => keywordPattern(keyword).test(title || ""));
 }
 
 // 发帖人解析：按逗号 / 顿号 / 分号 / 换行分隔（不按空格，用户名可能含空格）
@@ -148,17 +172,14 @@ async function runCheck(reason) {
   const threads = parseThreads(html);
   const st = await getState();
 
-  // 过滤器：关键词（标题子串匹配）+ 发帖人（用户名精确匹配），均大小写不敏感
+  // 过滤器：关键词（短语 + 字母数字边界匹配）+ 发帖人（用户名精确匹配）
   const kws = parseKeywords(settings.keywords);
   const authors = parseAuthors(settings.authors);
   const kwOn = !!settings.keywordFilter && kws.length > 0;
   const auOn = !!settings.authorFilter && authors.length > 0;
   const anyFilter = kwOn || auOn;
   const combineAnd = settings.combine === "and";
-  const matchKw = (title) => {
-    const low = (title || "").toLowerCase();
-    return kws.some((k) => low.includes(k));
-  };
+  const matchKw = (title) => matchKeywords(title, kws);
   const matchAu = (author) => authors.includes((author || "").toLowerCase());
   const isAlertable = (t) => {
     if (!anyFilter) return true; // 未设任何过滤 -> 全部提醒
