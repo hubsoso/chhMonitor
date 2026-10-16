@@ -1,7 +1,7 @@
 // Chiphell 二手区监控 - service worker (MV3)
 
 const MONITOR_URL =
-  "https://www.chiphell.com/forum.php?mod=forumdisplay&fid=328&filter=typeid&typeid=1033";
+  "https://www.chiphell.com/forum-328-1.html";
 const LOGIN_URL = "https://www.chiphell.com/member.php?mod=logging&action=login";
 const ALARM = "ch_check";
 const KNOWN_CAP = 800; // 记忆的历史帖子 id 上限，防止无限增长
