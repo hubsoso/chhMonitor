@@ -37,19 +37,12 @@ function escapeRegExp(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// 短语中的空格可匹配空白或常见连接符；英文/数字两端使用边界，
-// 避免 "R5" 命中 "DDR5"、"5600" 命中 "15600"。
+// 按包含匹配关键词；短语中的空格可匹配空白或常见连接符。
+// 例如 "iPhone" 可命中 "iPhone17"，"R5 5600" 仍按完整短语匹配。
 function keywordPattern(keyword) {
   const parts = keyword.trim().split(/\s+/).map(escapeRegExp);
   const phrase = parts.join("[\\s\\-_/\\/·・‐‑‒–—]+");
-  const startsWithWord = /^[a-z0-9]/i.test(keyword);
-  const endsWithWord = /[a-z0-9]$/i.test(keyword);
-  return new RegExp(
-    (startsWithWord ? "(^|[^a-z0-9])" : "") +
-      phrase +
-      (endsWithWord ? "(?![a-z0-9])" : ""),
-    "i"
-  );
+  return new RegExp(phrase, "i");
 }
 
 function matchKeywords(title, keywords) {
@@ -172,7 +165,7 @@ async function runCheck(reason) {
   const threads = parseThreads(html);
   const st = await getState();
 
-  // 过滤器：关键词（短语 + 字母数字边界匹配）+ 发帖人（用户名精确匹配）
+  // 过滤器：关键词（标题包含匹配）+ 发帖人（用户名精确匹配）
   const kws = parseKeywords(settings.keywords);
   const authors = parseAuthors(settings.authors);
   const kwOn = !!settings.keywordFilter && kws.length > 0;
