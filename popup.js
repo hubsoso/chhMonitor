@@ -1,5 +1,5 @@
 const MONITOR_URL =
-  "https://www.chiphell.com/forum.php?mod=forumdisplay&fid=26&filter=author&orderby=dateline";
+  "https://www.chiphell.com/forum.php?mod=forumdisplay&fid=328&filter=typeid&typeid=1033";
 const LOGIN_URL = "https://www.chiphell.com/member.php?mod=logging&action=login";
 // 打赏：打开扩展内置的收款码页面（微信 / 支付宝扫码，无需跳转登录）
 const COFFEE_URL = chrome.runtime.getURL("donate.html");
