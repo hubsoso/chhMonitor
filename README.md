@@ -10,7 +10,7 @@
 - 📛 **角标计数**：图标上显示未读新帖数量
 - 🔎 **多站点监控**：同时监控 Chiphell 二手区和 V2EX「二手交易」节点
 - 📋 **列表直达**：点图标弹出列表（标题 + 发帖人），点条目在新标签打开原帖
-- 🔔 **可选弹窗通知**：默认关闭，仅角标提示，不打断当前操作
+- 🔔 **桌面提示与提示音**：总通知开启后可分别控制，默认只保留角标提示
 - 🏷️ **关键词过滤**：只对标题命中关键词的新帖提醒
 - 👤 **发帖人过滤**：只盯指定卖家，可与关键词按「或 / 且」组合
 - ⏱️ **自定义刷新周期**：1–30 分钟，附随机抖动规避频率风控
@@ -32,7 +32,7 @@
 ## 使用
 
 - 点扩展图标查看新帖列表；打开弹窗即清零角标
-- 点弹窗右下角 **设置** 配置：刷新周期、弹窗开关、关键词、发帖人、组合方式
+- 点弹窗右下角 **设置** 配置：刷新周期、通知总开关、桌面提示、提示音、关键词、发帖人、组合方式
 - 改动设置或代码后，到 `chrome://extensions/` 点 🔄 重新加载
 
 ## 工作原理
@@ -90,7 +90,7 @@ A Chrome extension (Manifest V3) that monitors Chiphell's second-hand section an
 - 📛 **Badge count**: shows the number of unread new posts on the icon
 - 🔎 **Multi-site monitoring**: tracks Chiphell's second-hand section and V2EX's all4all node
 - 📋 **Direct list access**: click the icon for a popup list (title + poster); click an item to open the original post in a new tab
-- 🔔 **Optional popup notifications**: off by default — badge-only, so it won't interrupt what you're doing
+- 🔔 **Desktop notifications and sound**: separate switches under the master notification toggle; badge-only by default
 - 🏷️ **Keyword filter**: only alerts on new posts whose title matches your keywords
 - 👤 **Poster filter**: watch only specific sellers, combinable with keywords via "OR / AND"
 - ⏱️ **Custom refresh interval**: 1–30 minutes, with random jitter to avoid rate-limit controls

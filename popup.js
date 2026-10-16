@@ -15,6 +15,14 @@ function render(state, settings) {
   const dot = $("dot");
   const statusText = $("statusText");
   const banner = $("banner");
+  const notifyBanner = $("notifyBanner");
+
+  if (state.lastNotificationError) {
+    notifyBanner.textContent = `系统通知发送失败，稍后重试：${state.lastNotificationError}`;
+    notifyBanner.style.display = "block";
+  } else {
+    notifyBanner.style.display = "none";
+  }
 
   if (state.loginOk === false) {
     dot.className = "dot bad";

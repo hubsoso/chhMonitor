@@ -15,7 +15,7 @@
 ### 数据如何处理
 - 扩展仅向被监控的 Chiphell 版块和 V2EX JSON Feed（`https://www.chiphell.com`、`https://www.v2ex.com`）发起**只读**请求，用于检测是否有新帖。
 - Chiphell 请求使用**你本机浏览器中已有的登录状态（Cookie）**；V2EX 使用公开 JSON Feed。扩展不会读取、保存或传输你的账号密码或 Cookie。
-- 你的**设置项**（刷新周期、关键词、发帖人、是否弹窗）和**已读记录**（帖子 ID）仅保存在**你本机的浏览器本地存储**（`chrome.storage.local`）中，**不会上传到任何服务器**。
+- 你的**设置项**（刷新周期、关键词、发帖人、桌面提示和声音开关）和**已读记录**（帖子 ID）仅保存在**你本机的浏览器本地存储**（`chrome.storage.local`）中，**不会上传到任何服务器**。
 
 ### 数据共享
 本扩展**不与任何第三方共享数据**，不含任何分析、追踪、广告 SDK，也不使用任何远程代码。
@@ -24,6 +24,7 @@
 - `storage`：本地保存你的设置与已读记录。
 - `alarms`：按你设定的周期定时检查新帖。
 - `notifications`：在你开启时弹出新帖桌面通知。
+- `offscreen`：在你开启提示音时播放本机短音效；不采集或传输音频。
 - `host_permissions (chiphell.com, v2ex.com)`：读取被监控版块及 V2EX JSON Feed 以检测新帖。
 
 ### 联系方式
@@ -41,7 +42,7 @@ This extension is an **unofficial third-party tool** and is **not affiliated wit
 ### How data is handled
 - The extension only makes **read-only** requests to the monitored Chiphell forum and V2EX JSON Feed (`https://www.chiphell.com`, `https://www.v2ex.com`) to detect new posts.
 - Chiphell requests use **the login session (cookies) already present in your own browser**; V2EX uses its public JSON Feed. The extension never reads, stores, or transmits your credentials or cookies.
-- Your **settings** (refresh interval, keywords, authors, notification toggle) and **read state** (post IDs) are stored **only in your browser's local storage** (`chrome.storage.local`) and are **never uploaded to any server**.
+- Your **settings** (refresh interval, keywords, authors, desktop notification and sound toggles) and **read state** (post IDs) are stored **only in your browser's local storage** (`chrome.storage.local`) and are **never uploaded to any server**.
 
 ### Data sharing
 This extension **does not share any data with third parties**. It contains no analytics, tracking, or advertising SDKs, and executes no remote code.
@@ -50,6 +51,7 @@ This extension **does not share any data with third parties**. It contains no an
 - `storage`: store your settings and read state locally.
 - `alarms`: periodically check for new posts on your chosen interval.
 - `notifications`: show desktop notifications for new posts when enabled.
+- `offscreen`: play a local notification sound when enabled; no audio is recorded or transmitted.
 - `host_permissions (chiphell.com, v2ex.com)`: read the monitored forum section and V2EX JSON Feed to detect new posts.
 
 ### Contact

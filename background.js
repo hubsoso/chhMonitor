@@ -15,6 +15,8 @@ async function getSettings() {
     {
       intervalMinutes: 5,
       notify: false,
+      notifyPopup: true,
+      notifySound: false,
       keywords: "",
       keywordFilter: false,
       authors: "",
@@ -74,6 +76,8 @@ async function ensureDefaults() {
       {
         intervalMinutes: 5,
         notify: false,
+        notifyPopup: true,
+        notifySound: false,
         keywords: "",
         keywordFilter: false,
         authors: "",
@@ -236,8 +240,8 @@ function setBadge(text, color) {
   chrome.action.setBadgeText({ text: text || "" });
   if (color) chrome.action.setBadgeBackgroundColor({ color });
 }
-async function notify(title, message, targetUrl = MONITOR_URL) {
-  const notificationId = `monitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+async function notify(title, message, targetUrl = MONITOR_URL, stableId = "") {
+  const notificationId = stableId || `monitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const { notificationTargets = {} } = await chrome.storage.local.get(["notificationTargets"]);
   await chrome.storage.local.set({ notificationTargets: { ...notificationTargets, [notificationId]: targetUrl } });
   await chrome.notifications.create(notificationId, {
@@ -247,6 +251,38 @@ async function notify(title, message, targetUrl = MONITOR_URL) {
     message,
     priority: 1,
   });
+}
+
+let offscreenCreation;
+async function playNotificationSound() {
+  const documentUrl = chrome.runtime.getURL("offscreen.html");
+  const contexts = await chrome.runtime.getContexts({
+    contextTypes: ["OFFSCREEN_DOCUMENT"],
+    documentUrls: [documentUrl],
+  });
+  if (contexts.length === 0) {
+    if (!offscreenCreation) {
+      offscreenCreation = chrome.offscreen.createDocument({
+        url: "offscreen.html",
+        reasons: ["AUDIO_PLAYBACK"],
+        justification: "Play the user-enabled new post notification sound.",
+      }).finally(() => { offscreenCreation = undefined; });
+    }
+    await offscreenCreation;
+  }
+  const response = await chrome.runtime.sendMessage({ type: "playNotificationSound" });
+  if (!response || !response.ok) {
+    throw new Error(response && response.error ? response.error : "提示音播放失败");
+  }
+}
+
+function notificationBatchId(threads) {
+  const value = threads.map((thread) => thread.tid).sort().join("|");
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i++) {
+    hash = Math.imul(hash ^ value.charCodeAt(i), 16777619);
+  }
+  return `monitor-batch-${(hash >>> 0).toString(36)}`;
 }
 
 // ---------- 核心检查 ----------
@@ -310,7 +346,9 @@ async function runCheck(reason) {
     source: t.source || "chiphell",
     sourceLabel: t.sourceLabel || "Chiphell",
   }));
-  const alertable = [];
+  const pendingAlerts = new Map(
+    (st.pendingAlerts || []).map((thread) => [thread.tid, thread])
+  );
   const errors = [];
   const sourceStatus = {};
   let nextState = {};
@@ -333,7 +371,7 @@ async function runCheck(reason) {
       const message = "需要登录或登录已过期";
       errors.push(`Chiphell：${message}`);
       sourceStatus[source.key] = { ok: false, error: message, count: 0 };
-      if (settings.notify && !st.loginWarned) {
+      if (settings.notify && settings.notifyPopup && !st.loginWarned) {
         await notify("Chiphell 监控：需要登录", "检测到未登录或登录已过期，点击扩展图标去登录。");
       }
       nextState.loginWarned = true;
@@ -354,7 +392,9 @@ async function runCheck(reason) {
     const matchingNew = brandNew.filter(isAlertable);
     matchingNew.forEach((thread) => {
       unread.add(thread.tid);
-      alertable.push(thread);
+      if (settings.notify && (settings.notifyPopup || settings.notifySound)) {
+        pendingAlerts.set(thread.tid, thread);
+      }
     });
     current.forEach((thread) => known.add(thread.tid));
     threads = threads.filter((thread) => thread.source !== source.key).concat(current);
@@ -374,6 +414,7 @@ async function runCheck(reason) {
     ...nextState,
     knownTids: knownArr,
     unreadTids: [...unread],
+    pendingAlerts: [...pendingAlerts.values()],
     threads,
     lastCheck: Date.now(),
     lastError: errors.join("；"),
@@ -383,16 +424,31 @@ async function runCheck(reason) {
   const badgeCount = unread.size;
   setBadge(badgeCount > 0 ? String(badgeCount) : "", "#c8102e");
 
-  if (settings.notify && alertable.length > 0) {
-    const sortedAlertable = sortNewestFirst(alertable);
-    const head = sortedAlertable
+  if (settings.notify && (settings.notifyPopup || settings.notifySound) && pendingAlerts.size > 0) {
+    const batch = sortNewestFirst([...pendingAlerts.values()]);
+    const head = batch
       .slice(0, 3)
-      .map((t) => `• [${t.sourceLabel}] ${t.title}`)
+      .map((thread) => `• [${thread.sourceLabel || "新帖"}] ${thread.title}`)
       .join("\n");
-    const more = sortedAlertable.length > 3 ? `\n…共 ${sortedAlertable.length} 条` : "";
-    const tip = anyFilter ? "（命中过滤）" : "";
-    const targetUrl = sortedAlertable[0].source === "v2ex" ? V2EX_URL : MONITOR_URL;
-    await notify(`CHH / V2EX ${sortedAlertable.length} 条新帖${tip}`, head + more, targetUrl);
+    const more = batch.length > 3 ? `\n…共 ${batch.length} 条` : "";
+    const targetUrl = batch[0].source === "v2ex" ? V2EX_URL : MONITOR_URL;
+    try {
+      if (settings.notifyPopup) {
+        await notify(
+          `CHH / V2EX ${batch.length} 条新帖${anyFilter ? "（命中过滤）" : ""}`,
+          head + more,
+          targetUrl,
+          notificationBatchId(batch)
+        );
+      }
+      if (settings.notifySound) await playNotificationSound();
+      await patchState({ pendingAlerts: [], lastNotificationError: "" });
+    } catch (error) {
+      await patchState({
+        pendingAlerts: batch,
+        lastNotificationError: error.message || "通知发送失败",
+      });
+    }
   }
 }
 
@@ -453,6 +509,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
 // ---------- 消息（来自 popup / options） ----------
 chrome.runtime.onMessage.addListener((msg, sender, send) => {
+  if (msg.type === "playNotificationSound") return false;
   (async () => {
     if (msg.type === "getState") {
       send({ ok: true, state: await getState(), settings: await getSettings() });
