@@ -1,5 +1,3 @@
-const MONITOR_URL =
-  "https://www.chiphell.com/forum-328-1.html";
 const LOGIN_URL = "https://www.chiphell.com/member.php?mod=logging&action=login";
 // 打赏：打开扩展内置的收款码页面（微信 / 支付宝扫码，无需跳转登录）
 const COFFEE_URL = chrome.runtime.getURL("donate.html");
@@ -20,7 +18,7 @@ function render(state, settings) {
 
   if (state.loginOk === false) {
     dot.className = "dot bad";
-    statusText.textContent = "未登录";
+    statusText.textContent = "Chiphell 未登录";
     banner.style.display = "block";
   } else if (state.loginOk === true) {
     dot.className = "dot ok";
@@ -54,6 +52,7 @@ function render(state, settings) {
       title.className = "t";
       title.innerHTML =
         (isNew ? '<span class="newdot"></span>' : "") +
+        `<span class="source-tag">${escapeHtml(t.sourceLabel || "Chiphell")}</span>` +
         (t.match ? '<span class="kwtag">关键词</span>' : "") +
         escapeHtml(t.title);
       const by = document.createElement("span");

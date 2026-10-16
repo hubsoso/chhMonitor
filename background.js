@@ -3,6 +3,8 @@
 const MONITOR_URL =
   "https://www.chiphell.com/forum-328-1.html";
 const LOGIN_URL = "https://www.chiphell.com/member.php?mod=logging&action=login";
+const V2EX_URL = "https://www.v2ex.com/go/all4all?p=1";
+const V2EX_FEED_URL = "https://www.v2ex.com/feed/all4all.json";
 const ALARM = "ch_check";
 const KNOWN_CAP = 800; // 记忆的历史帖子 id 上限，防止无限增长
 
@@ -99,6 +101,80 @@ function stripTags(s) {
   return s.replace(/<[^>]+>/g, "");
 }
 
+function parseDisplayTime(value, now = Date.now()) {
+  const text = decodeEntities(stripTags(value || "")).trim();
+  if (!text) return null;
+
+  const relative = text.match(/(刚刚|\d+\s*秒前|\d+\s*分钟前|\d+\s*小时前|\d+\s*天前)/);
+  if (relative) {
+    if (relative[1] === "刚刚") return now;
+    const amount = Number(relative[1].match(/\d+/)[0]);
+    const unit = relative[1];
+    const factor = unit.includes("秒") ? 1000 : unit.includes("分钟") ? 60000 : unit.includes("小时") ? 3600000 : 86400000;
+    return now - amount * factor;
+  }
+
+  const relativeDay = text.match(/(今天|昨天|前天)\s*(\d{1,2}):(\d{2})/);
+  if (relativeDay) {
+    const date = new Date(now);
+    date.setDate(date.getDate() - ({ 今天: 0, 昨天: 1, 前天: 2 }[relativeDay[1]]));
+    date.setHours(Number(relativeDay[2]), Number(relativeDay[3]), 0, 0);
+    return date.getTime();
+  }
+
+  // JSON Feed 用带时区的 ISO 8601 时间（例如 +00:00）；直接解析以保留时区，
+  // 不能把 UTC 的小时误当成本地时间。
+  if (/T.*(?:Z|[+-]\d{2}:?\d{2})$/i.test(text)) {
+    const zoned = Date.parse(text);
+    if (!Number.isNaN(zoned)) return zoned;
+  }
+
+  const fullDate = text.match(/(20\d{2})[-/.年](\d{1,2})[-/.月](\d{1,2})(?:日)?(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (fullDate) {
+    return new Date(
+      Number(fullDate[1]), Number(fullDate[2]) - 1, Number(fullDate[3]),
+      Number(fullDate[4] || 0), Number(fullDate[5] || 0), Number(fullDate[6] || 0)
+    ).getTime();
+  }
+
+  const shortDate = text.match(/(?:^|\D)(\d{1,2})[-/.](\d{1,2})(?:\s+(\d{1,2}):(\d{2}))?/);
+  if (shortDate) {
+    const current = new Date(now);
+    let year = current.getFullYear();
+    let date = new Date(year, Number(shortDate[1]) - 1, Number(shortDate[2]), Number(shortDate[3] || 0), Number(shortDate[4] || 0));
+    if (date.getTime() > now + 86400000) date = new Date(year - 1, Number(shortDate[1]) - 1, Number(shortDate[2]), Number(shortDate[3] || 0), Number(shortDate[4] || 0));
+    return date.getTime();
+  }
+
+  const parsed = Date.parse(text);
+  return Number.isNaN(parsed) ? null : parsed;
+}
+
+function extractChiphellPostTime(block) {
+  const byCells = [...block.matchAll(/<td\b[^>]*class=["'][^"']*\bby\b[^"']*["'][^>]*>([\s\S]*?)<\/td>/g)];
+  // Discuz 每行先列发帖人/发帖时间，再列最后回复人/回复时间；取第一个 by 单元格与 V2EX 的 date_published 对齐。
+  const postCell = byCells[0]?.[1] || block;
+  const attrs = [...postCell.matchAll(/(?:title|datetime)=["']([^"']+)["']/g)];
+  for (const attr of attrs) {
+    const parsed = parseDisplayTime(attr[1]);
+    if (parsed !== null) return parsed;
+  }
+  const em = [...postCell.matchAll(/<em\b[^>]*>([\s\S]*?)<\/em>/g)].pop();
+  if (em) return parseDisplayTime(em[1]);
+  return parseDisplayTime(postCell);
+}
+
+function sortNewestFirst(threads) {
+  return threads
+    .map((thread, index) => ({ thread, index }))
+    .sort((a, b) => {
+      const aTime = Number(a.thread.publishedAt) || 0;
+      const bTime = Number(b.thread.publishedAt) || 0;
+      return bTime - aTime || a.index - b.index;
+    })
+    .map(({ thread }) => thread);
+}
+
 // 只解析 normalthread_（普通主题），忽略置顶 stickthread_
 function parseThreads(html) {
   const threads = [];
@@ -111,17 +187,43 @@ function parseThreads(html) {
     if (!tm) continue;
     const title = decodeEntities(stripTags(tm[1])).trim();
     if (!title) continue;
+    // Chiphell 会把版规作为普通主题返回（没有 stickthread_ 标记）；它不是一条需要监控的交易帖。
+    if (/版规/.test(title)) continue;
     let author = "";
     const am = block.match(/<td class="by">[\s\S]*?<cite>([\s\S]*?)<\/cite>/);
     if (am) author = decodeEntities(stripTags(am[1])).trim();
     threads.push({
-      tid,
+      tid: `chh:${tid}`,
       title,
       author,
+      publishedAt: extractChiphellPostTime(block),
       url: `https://www.chiphell.com/thread-${tid}-1-1.html`,
+      source: "chiphell",
+      sourceLabel: "Chiphell",
     });
   }
   return threads;
+}
+
+function parseV2exFeed(json) {
+  const feed = JSON.parse(json);
+  return (feed.items || [])
+    .filter((item) => item && item.id && item.title && item.url)
+    .map((item) => {
+      const author = Array.isArray(item.authors) ? item.authors[0] : item.author;
+      const id = String(item.id).match(/\/t\/(\d+)/)?.[1] || String(item.id);
+      const date = item.date_published || item.date_modified;
+      const publishedAt = date ? Date.parse(date) : null;
+      return {
+        tid: `v2ex:${id}`,
+        title: item.title,
+        author: (author && author.name) || "",
+        publishedAt: Number.isNaN(publishedAt) ? null : publishedAt,
+        url: item.url,
+        source: "v2ex",
+        sourceLabel: "V2EX",
+      };
+    });
 }
 
 // 登录检测：登录后页面含 退出登录 链接（action=logout）
@@ -134,8 +236,11 @@ function setBadge(text, color) {
   chrome.action.setBadgeText({ text: text || "" });
   if (color) chrome.action.setBadgeBackgroundColor({ color });
 }
-function notify(title, message) {
-  chrome.notifications.create({
+async function notify(title, message, targetUrl = MONITOR_URL) {
+  const notificationId = `monitor-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  const { notificationTargets = {} } = await chrome.storage.local.get(["notificationTargets"]);
+  await chrome.storage.local.set({ notificationTargets: { ...notificationTargets, [notificationId]: targetUrl } });
+  await chrome.notifications.create(notificationId, {
     type: "basic",
     iconUrl: "icons/icon128.png",
     title,
@@ -147,25 +252,29 @@ function notify(title, message) {
 // ---------- 核心检查 ----------
 async function runCheck(reason) {
   const settings = await getSettings();
-  let html;
-  try {
-    const resp = await fetch(MONITOR_URL, {
+  const st = await getState();
+
+  const [chiphellResult, v2exResult] = await Promise.all([
+    fetch(MONITOR_URL, {
       credentials: "include",
       cache: "no-store",
       headers: { Accept: "text/html,application/xhtml+xml" },
-    });
-    html = await resp.text();
-    if (!resp.ok) throw new Error("HTTP " + resp.status);
-  } catch (e) {
-    await patchState({ lastError: "网络错误：" + e.message, lastCheck: Date.now() });
-    return;
-  }
+    }).then(async (resp) => {
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      const html = await resp.text();
+      return { loggedIn: detectLogin(html), threads: parseThreads(html) };
+    }).catch((error) => ({ error })),
+    fetch(V2EX_FEED_URL, {
+      credentials: "include",
+      cache: "no-store",
+      headers: { Accept: "application/feed+json, application/json" },
+    }).then(async (resp) => {
+      if (!resp.ok) throw new Error("HTTP " + resp.status);
+      return { threads: parseV2exFeed(await resp.text()) };
+    }).catch((error) => ({ error })),
+  ]);
 
-  const loggedIn = detectLogin(html);
-  const threads = parseThreads(html);
-  const st = await getState();
-
-  // 过滤器：关键词（标题包含匹配）+ 发帖人（用户名精确匹配）
+  // 关键词和发帖人过滤同时应用于 Chiphell 与 V2EX。
   const kws = parseKeywords(settings.keywords);
   const authors = parseAuthors(settings.authors);
   const kwOn = !!settings.keywordFilter && kws.length > 0;
@@ -183,84 +292,107 @@ async function runCheck(reason) {
       ? matchKw(t.title) && matchAu(t.author)
       : matchKw(t.title) || matchAu(t.author);
   };
-  threads.forEach((t) => (t.match = anyFilter && isAlertable(t)));
+  const known = new Set((st.knownTids || []).map((id) =>
+    String(id).startsWith("chh:") || String(id).startsWith("v2ex:")
+      ? String(id)
+      : `chh:${id}`
+  ));
+  const unread = new Set((st.unreadTids || []).map((id) =>
+    String(id).startsWith("chh:") || String(id).startsWith("v2ex:")
+      ? String(id)
+      : `chh:${id}`
+  ));
+  let threads = (st.threads || []).map((t) => ({
+    ...t,
+    tid: String(t.tid).startsWith("chh:") || String(t.tid).startsWith("v2ex:")
+      ? String(t.tid)
+      : `chh:${t.tid}`,
+    source: t.source || "chiphell",
+    sourceLabel: t.sourceLabel || "Chiphell",
+  }));
+  const alertable = [];
+  const errors = [];
+  const sourceStatus = {};
+  let nextState = {};
 
-  // 未登录 / 登录过期
-  if (!loggedIn) {
-    setBadge("!", "#e67e22");
-    await patchState({
-      loginOk: false,
-      lastCheck: Date.now(),
-      lastError: "",
-    });
-    if (settings.notify && !st.loginWarned) {
-      notify("Chiphell 监控：需要登录", "检测到未登录或登录已过期，点击扩展图标去登录。");
+  const sourceResults = [
+    { key: "chiphell", label: "Chiphell", result: chiphellResult, seeded: !!st.seeded },
+    { key: "v2ex", label: "V2EX", result: v2exResult, seeded: !!st.v2exSeeded },
+  ];
+
+  for (const source of sourceResults) {
+    const { result } = source;
+    if (result.error) {
+      const message = result.error.message || "检查失败";
+      errors.push(`${source.label}：${message}`);
+      sourceStatus[source.key] = { ok: false, error: message, count: 0 };
+      continue;
     }
-    await patchState({ loginWarned: true });
-    return;
-  }
+    if (source.key === "chiphell" && !result.loggedIn) {
+      nextState.loginOk = false;
+      const message = "需要登录或登录已过期";
+      errors.push(`Chiphell：${message}`);
+      sourceStatus[source.key] = { ok: false, error: message, count: 0 };
+      if (settings.notify && !st.loginWarned) {
+        await notify("Chiphell 监控：需要登录", "检测到未登录或登录已过期，点击扩展图标去登录。");
+      }
+      nextState.loginWarned = true;
+      continue;
+    }
+    if (!result.threads.length) {
+      const message = "未解析到帖子";
+      errors.push(`${source.label}：${message}`);
+      sourceStatus[source.key] = { ok: false, error: message, count: 0 };
+      continue;
+    }
 
-  // 已登录但没解析到帖子：可能页面结构变化，保留旧数据
-  if (threads.length === 0) {
-    await patchState({
-      loginOk: true,
-      loginWarned: false,
-      lastCheck: Date.now(),
-      lastError: "未解析到帖子（页面结构可能已变化）",
+    const current = result.threads.map((thread) => ({
+      ...thread,
+      match: anyFilter && isAlertable(thread),
+    }));
+    const brandNew = source.seeded ? current.filter((thread) => !known.has(thread.tid)) : [];
+    const matchingNew = brandNew.filter(isAlertable);
+    matchingNew.forEach((thread) => {
+      unread.add(thread.tid);
+      alertable.push(thread);
     });
-    return;
+    current.forEach((thread) => known.add(thread.tid));
+    threads = threads.filter((thread) => thread.source !== source.key).concat(current);
+    sourceStatus[source.key] = { ok: true, error: "", count: current.length };
+    nextState[source.key === "chiphell" ? "seeded" : "v2exSeeded"] = true;
+    if (source.key === "chiphell") {
+      nextState.loginOk = true;
+      nextState.loginWarned = false;
+    }
   }
 
-  const known = new Set(st.knownTids || []);
-  const unread = new Set(st.unreadTids || []);
-
-  // 首次运行：建立基线，不报新帖、不弹窗
-  if (!st.seeded) {
-    threads.forEach((t) => known.add(t.tid));
-    await patchState({
-      seeded: true,
-      knownTids: [...known],
-      unreadTids: [],
-      threads,
-      loginOk: true,
-      loginWarned: false,
-      lastCheck: Date.now(),
-      lastError: "",
-    });
-    setBadge("", "");
-    return;
-  }
-
-  // 找出全新帖子；开启过滤时，只有命中过滤条件的才计入提醒
-  const brandNew = threads.filter((t) => !known.has(t.tid));
-  const alertable = brandNew.filter(isAlertable);
-  alertable.forEach((t) => unread.add(t.tid));
-  threads.forEach((t) => known.add(t.tid)); // 所有当前帖都记为已知，未命中的下次不再算新
-
-  let knownArr = [...known];
-  if (knownArr.length > KNOWN_CAP) knownArr = knownArr.slice(knownArr.length - KNOWN_CAP);
-
+  const chiphellThreads = threads.filter((thread) => thread.source === "chiphell");
+  const v2exThreads = threads.filter((thread) => thread.source === "v2ex");
+  threads = sortNewestFirst([...v2exThreads, ...chiphellThreads]);
+  const knownArr = [...known].slice(-KNOWN_CAP);
   await patchState({
+    ...nextState,
     knownTids: knownArr,
     unreadTids: [...unread],
     threads,
-    loginOk: true,
-    loginWarned: false,
     lastCheck: Date.now(),
-    lastError: "",
+    lastError: errors.join("；"),
+    sourceStatus,
   });
 
   const badgeCount = unread.size;
   setBadge(badgeCount > 0 ? String(badgeCount) : "", "#c8102e");
 
   if (settings.notify && alertable.length > 0) {
-    const head = alertable
+    const sortedAlertable = sortNewestFirst(alertable);
+    const head = sortedAlertable
       .slice(0, 3)
-      .map((t) => "• " + t.title)
+      .map((t) => `• [${t.sourceLabel}] ${t.title}`)
       .join("\n");
-    const more = alertable.length > 3 ? `\n…共 ${alertable.length} 条` : "";
+    const more = sortedAlertable.length > 3 ? `\n…共 ${sortedAlertable.length} 条` : "";
     const tip = anyFilter ? "（命中过滤）" : "";
-    notify(`Chiphell 二手区 ${alertable.length} 条新帖${tip}`, head + more);
+    const targetUrl = sortedAlertable[0].source === "v2ex" ? V2EX_URL : MONITOR_URL;
+    await notify(`CHH / V2EX ${sortedAlertable.length} 条新帖${tip}`, head + more, targetUrl);
   }
 }
 
@@ -294,8 +426,12 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 // 点击通知 -> 打开二手区
-chrome.notifications.onClicked.addListener(() => {
-  chrome.tabs.create({ url: MONITOR_URL });
+chrome.notifications.onClicked.addListener(async (notificationId) => {
+  const { notificationTargets = {} } = await chrome.storage.local.get(["notificationTargets"]);
+  const url = notificationTargets[notificationId] || MONITOR_URL;
+  delete notificationTargets[notificationId];
+  await chrome.storage.local.set({ notificationTargets });
+  chrome.tabs.create({ url });
 });
 
 // 当用户在 chiphell 页面完成加载（如重新登录后页面刷新）时，立即复查一次，
@@ -304,7 +440,7 @@ let lastAutoCheck = 0;
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   if (changeInfo.status !== "complete") return;
   const url = (tab && tab.url) || "";
-  if (!url.includes("chiphell.com")) return;
+  if (!url.includes("chiphell.com") && !url.includes("v2ex.com/go/all4all")) return;
   const st = await getState();
   const now = Date.now();
   // 登录过期时优先立即复查；否则 30 秒节流，避免频繁请求触发风控

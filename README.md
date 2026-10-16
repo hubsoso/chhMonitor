@@ -1,13 +1,14 @@
-# CHH 二手区上新提醒（非官方）
+# CHH / V2EX 新帖提醒（非官方）
 
-一个 Chrome 扩展（Manifest V3），用于监控 Chiphell 论坛二手交易区的新帖并及时提醒。
-**非官方第三方工具，与 Chiphell 无关联。**
+一个 Chrome 扩展（Manifest V3），用于监控 Chiphell 二手交易区和 V2EX「二手交易」节点的新帖并及时提醒。
+**非官方第三方工具，与 Chiphell 和 V2EX 均无关联。**
 
 > 📦 已上架 **[Chrome 应用商店](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea)** —— 点击一键安装。
 
 ## 功能
 
 - 📛 **角标计数**：图标上显示未读新帖数量
+- 🔎 **多站点监控**：同时监控 Chiphell 二手区和 V2EX「二手交易」节点
 - 📋 **列表直达**：点图标弹出列表（标题 + 发帖人），点条目在新标签打开原帖
 - 🔔 **可选弹窗通知**：默认关闭，仅角标提示，不打断当前操作
 - 🏷️ **关键词过滤**：只对标题命中关键词的新帖提醒
@@ -19,14 +20,14 @@
 
 **推荐**：直接从 [Chrome 应用商店](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea) 一键安装，自动更新。
 
-安装后确保同一个 Chrome 已登录 chiphell.com（扩展复用你的登录 Cookie）。
+监控 Chiphell 需要同一个 Chrome 已登录 chiphell.com；V2EX 节点使用公开 JSON Feed。
 
 ### 开发者模式（本地开发 / 自行修改）
 
 1. 打开 `chrome://extensions/`
 2. 右上角开启 **开发者模式**
 3. 点 **加载已解压的扩展程序**，选择本目录
-4. 确保同一个 Chrome 已登录 chiphell.com（扩展复用你的登录 Cookie）
+4. 监控 Chiphell 需要同一个 Chrome 已登录 chiphell.com；V2EX 节点使用公开 JSON Feed
 
 ## 使用
 
@@ -36,7 +37,7 @@
 
 ## 工作原理
 
-- 后台 service worker 用 `chrome.alarms` 定时拉取版块页面，正则解析 `normalthread_` 主题块，用帖子 `tid` 判定"新帖"并拼接直达链接。
+- 后台 service worker 用 `chrome.alarms` 定时拉取 Chiphell 版块页面和 V2EX JSON Feed，分别解析帖子并用来源 + 帖子 ID 判定"新帖"。
 - 首次安装建立基线（不把历史帖当新帖）；之后仅未出现过的帖子算新。
 - 登录检测：页面是否含"退出登录"链接。
 
@@ -69,7 +70,7 @@ chiphell-monitor/
 
 ## 免责声明
 
-本扩展为第三方非官方工具，与 Chiphell 论坛无任何关联。请在遵守目标网站使用条款的前提下合理使用。
+本扩展为第三方非官方工具，与 Chiphell 和 V2EX 均无关联。请在遵守目标网站使用条款的前提下合理使用。
 
 ## 许可证
 
@@ -79,14 +80,15 @@ chiphell-monitor/
 
 # CHH Marketplace New-Post Alert (Unofficial)
 
-A Chrome extension (Manifest V3) that monitors the second-hand trading section of the Chiphell forum for new posts and alerts you promptly.
-**Unofficial third-party tool, not affiliated with Chiphell.**
+A Chrome extension (Manifest V3) that monitors Chiphell's second-hand section and V2EX's all4all node for new posts and alerts you promptly.
+**Unofficial third-party tool, not affiliated with Chiphell or V2EX.**
 
 > 📦 Available on the **[Chrome Web Store](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea)** — install with one click.
 
 ## Features
 
 - 📛 **Badge count**: shows the number of unread new posts on the icon
+- 🔎 **Multi-site monitoring**: tracks Chiphell's second-hand section and V2EX's all4all node
 - 📋 **Direct list access**: click the icon for a popup list (title + poster); click an item to open the original post in a new tab
 - 🔔 **Optional popup notifications**: off by default — badge-only, so it won't interrupt what you're doing
 - 🏷️ **Keyword filter**: only alerts on new posts whose title matches your keywords
@@ -98,14 +100,14 @@ A Chrome extension (Manifest V3) that monitors the second-hand trading section o
 
 **Recommended**: install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/chh-%E4%BA%8C%E6%89%8B%E5%8C%BA%E4%B8%8A%E6%96%B0%E6%8F%90%E9%86%92%EF%BC%88%E9%9D%9E%E5%AE%98%E6%96%B9%EF%BC%89/aipfcjlcbjcdflfjbndifpdngmakbhea) for one-click install and automatic updates.
 
-After installing, make sure the same Chrome is logged in to chiphell.com (the extension reuses your login cookie).
+Chiphell monitoring requires the same Chrome profile to be logged in to chiphell.com; the V2EX node uses its public JSON Feed.
 
 ### Developer Mode (for local development / customization)
 
 1. Open `chrome://extensions/`
 2. Enable **Developer mode** in the top-right corner
 3. Click **Load unpacked** and select this directory
-4. Make sure the same Chrome is logged in to chiphell.com (the extension reuses your login cookie)
+4. Chiphell monitoring requires the same Chrome profile to be logged in to chiphell.com; the V2EX node uses its public JSON Feed
 
 ## Usage
 
@@ -115,7 +117,7 @@ After installing, make sure the same Chrome is logged in to chiphell.com (the ex
 
 ## How It Works
 
-- A background service worker uses `chrome.alarms` to periodically fetch the section page, parses `normalthread_` thread blocks with a regex, uses each post's `tid` to determine whether it's "new," and builds a direct link.
+- A background service worker uses `chrome.alarms` to fetch Chiphell's forum page and V2EX's JSON Feed, then identifies new posts by source and post ID.
 - On first install it establishes a baseline (so historical posts aren't treated as new); afterward, only posts not seen before count as new.
 - Login detection: whether the page contains a "log out" link.
 
@@ -148,7 +150,7 @@ If this little tool helps you, feel free to buy the author a coffee — thanks f
 
 ## Disclaimer
 
-This extension is an unofficial third-party tool with no affiliation to the Chiphell forum. Please use it reasonably and in compliance with the target website's terms of service.
+This extension is an unofficial third-party tool with no affiliation to Chiphell or V2EX. Please use it reasonably and in compliance with the target websites' terms of service.
 
 ## License
 
